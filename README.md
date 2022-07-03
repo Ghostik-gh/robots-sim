@@ -1,4 +1,9 @@
 # Robot Simulator 3d
+Checklist:
+- ✅ ~~some Application~~
+- ✅ ~~Free camera~~
+- ⏳ Axies
+- ⏳ UI
 ```
 cargo run
 ```
