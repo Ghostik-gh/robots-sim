@@ -2,6 +2,7 @@ use bevy::{
     prelude::*,
     window::{PresentMode, WindowMode},
 };
+use bevy_flycam::{MovementSettings, PlayerPlugin};
 
 fn main() {
     App::new()
@@ -12,16 +13,21 @@ fn main() {
             ..default()
         })
         .add_plugins(DefaultPlugins)
+        .add_plugin(PlayerPlugin)
+        .insert_resource(MovementSettings {
+            sensitivity: 0.00008, // default: 0.00012
+            speed: 8.0,           // default: 12.0
+        })
         .add_startup_system(setup)
         .run();
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn_scene(asset_server.load("models/kuka_0/scene.gltf#Scene0"));
-    commands.spawn_bundle(PerspectiveCameraBundle {
-        transform: Transform::from_xyz(1.7, 1.7, 2.0).looking_at(Vec3::new(0.0, 0.6, 0.0), Vec3::Y),
-        ..default()
-    });
+    // commands.spawn_bundle(PerspectiveCameraBundle {
+    //     transform: Transform::from_xyz(2.0, 2.0, 2.0).looking_at(Vec3::new(0.0, 0.7, 0.0), Vec3::Y),
+    //     ..Default::default()
+    // });
     const HALF_SIZE: f32 = 1.0;
     commands.spawn_bundle(DirectionalLightBundle {
         directional_light: DirectionalLight {
