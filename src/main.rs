@@ -3,6 +3,7 @@ use bevy::{
     window::{PresentMode, WindowMode},
 };
 use bevy_flycam::{MovementSettings, PlayerPlugin};
+use bevy_infinite_grid::{InfiniteGridBundle, InfiniteGridPlugin};
 
 fn main() {
     App::new()
@@ -13,36 +14,37 @@ fn main() {
             ..default()
         })
         .add_plugins(DefaultPlugins)
-        .add_plugin(PlayerPlugin)
+        .add_plugin(InfiniteGridPlugin)
+        .add_startup_system(setup)
+        .add_plugin(PlayerPlugin) // Camera
         .insert_resource(MovementSettings {
             sensitivity: 0.00008, // default: 0.00012
             speed: 8.0,           // default: 12.0
         })
-        .add_startup_system(setup)
         .run();
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    // Grid and Axies
+    commands.spawn_bundle(InfiniteGridBundle::default());
+    // Robot
     commands.spawn_scene(asset_server.load("models/kuka_0/scene.gltf#Scene0"));
-    // commands.spawn_bundle(PerspectiveCameraBundle {
-    //     transform: Transform::from_xyz(2.0, 2.0, 2.0).looking_at(Vec3::new(0.0, 0.7, 0.0), Vec3::Y),
-    //     ..Default::default()
-    // });
-    const HALF_SIZE: f32 = 1.0;
-    commands.spawn_bundle(DirectionalLightBundle {
-        directional_light: DirectionalLight {
-            shadow_projection: OrthographicProjection {
-                left: -HALF_SIZE,
-                right: HALF_SIZE,
-                bottom: -HALF_SIZE,
-                top: HALF_SIZE,
-                near: -10.0 * HALF_SIZE,
-                far: 10.0 * HALF_SIZE,
-                ..default()
-            },
-            shadows_enabled: true,
+    // BLOCK Lights
+    commands.spawn_bundle(PointLightBundle {
+        point_light: PointLight {
+            intensity: 15000.0,
             ..default()
         },
+        transform: Transform::from_xyz(-5.0, 8.0, -5.0),
         ..default()
     });
+    commands.spawn_bundle(PointLightBundle {
+        point_light: PointLight {
+            intensity: 15000.0,
+            ..default()
+        },
+        transform: Transform::from_xyz(5.0, 8.0, 5.0),
+        ..default()
+    });
+    // END BLOCK OF LIGHT
 }

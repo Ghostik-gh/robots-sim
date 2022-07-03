@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 bevy = "0.7.0"
 bevy_flycam = "*"
+bevy_infinite_grid = { git = "https://github.com/ForesightMiningSoftwareCorporation/bevy_infinite_grid", branch = "main" }
