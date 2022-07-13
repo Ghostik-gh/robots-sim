@@ -6,7 +6,8 @@ use bevy::{
     scene::InstanceId,
     window::{PresentMode, WindowMode},
 };
-use bevy_flycam::{MovementSettings, PlayerPlugin};
+use bevy_flycam::{FlyCam, MovementSettings, NoCameraPlayerPlugin};
+use bevy_mod_picking::*;
 use robots_sim::{InfiniteGridBundle, InfiniteGridPlugin};
 
 fn main() {
@@ -20,10 +21,10 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .init_resource::<SceneInstance>()
         .add_plugin(InfiniteGridPlugin)
+        .add_plugins(DefaultPickingPlugins)
         .add_startup_system(setup)
         .add_system(scene_update)
-        // .add_system(print_keyboard_event_system)
-        .add_plugin(PlayerPlugin) // Camera
+        .add_plugin(NoCameraPlayerPlugin)
         .insert_resource(MovementSettings {
             sensitivity: 0.00008, // default: 0.00012
             speed: 8.0,           // default: 12.0
@@ -42,24 +43,43 @@ struct EntityInMyScene;
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut scene_spawner: ResMut<SceneSpawner>,
-    mut scene_instance: ResMut<SceneInstance>,
+    // mut scene_spawner: ResMut<SceneSpawner>,
+    // mut scene_instance: ResMut<SceneInstance>,
 ) {
     // let path_to_robo = "models/Black_Honey/scene.gltf#Scene0";
-    let path_to_robo = "models/details_kuka_0/TEST.gltf#Scene0";
+    // let path_to_robo = "models/details_kuka_0/TEST.gltf#Scene0";
+
     // Grid and Axies
     commands.spawn_bundle(InfiniteGridBundle::default());
-    // 2 Robots
+
+    // commands
+    //     .spawn_bundle(Camera3dBundle {
+    //         transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
+    //         ..Default::default()
+    //     })
+    //     .insert_bundle(PickingCameraBundle::default());
+
+    // Camera
+    let camera = PerspectiveCameraBundle {
+        transform: Transform::from_xyz(40.0, 25.0, 40.0).looking_at(Vec3::ZERO, Vec3::Y),
+        ..Default::default()
+    };
+    commands
+        .spawn_bundle(camera)
+        .insert(FlyCam)
+        .insert_bundle(PickingCameraBundle::default());
+
+    // Spawn objects
     commands
         .spawn_bundle(TransformBundle::from(Transform::from_xyz(-2.0, 0.0, -2.0)))
         .with_children(|parent| {
             parent.spawn_scene(asset_server.load("models/details_kuka_0/TEST.gltf#Scene0"));
-        });
-    let instance_id = scene_spawner.spawn(asset_server.load(path_to_robo));
-    scene_instance.0 = Some(instance_id);
-    let instance_id = scene_spawner.spawn(asset_server.load(path_to_robo));
-    scene_instance.0 = Some(instance_id);
-    // Lights
+        })
+        .insert_bundle(PickableBundle::default());
+
+    // let instance_id_0 = scene_spawner.spawn(asset_server.load("models/details_kuka_0/0.gltf#Scene0"));
+    // scene_instance.0 = Some(instance_id_0);
+
     commands.spawn_bundle(PointLightBundle {
         point_light: PointLight {
             intensity: 15000.0,
@@ -77,13 +97,6 @@ fn setup(
         ..default()
     });
 }
-
-// This system Read keyboard event and print them
-// fn print_keyboard_event_system(mut keyboard_input_events: EventReader<KeyboardInput>) {
-//     for event in keyboard_input_events.iter() {
-//         info!("{:?}", event);
-//     }
-// }
 
 // This system will wait for the scene to be ready, and then tag entities from
 // the scene with `EntityInMyScene`. All entities from the second scene will be
@@ -125,10 +138,9 @@ fn move_scene_entities(
             //////////////////////
         }
         for mut transform in scene_entities.iter_mut() {
-            let rotation_speed = Quat::from_rotation_z(current_angle);
+            let rotation_speed = Quat::from_rotation_x(current_angle);
             transform.rotate(rotation_speed);
         }
-        // info!("{:?}", event);
     }
 
     // let mut x = 0.;
@@ -149,3 +161,10 @@ fn move_scene_entities(
     //     scale += 0.1;
     // }
 }
+
+// This system Read keyboard event and print them
+// fn print_keyboard_event_system(mut keyboard_input_events: EventReader<KeyboardInput>) {
+//     for event in keyboard_input_events.iter() {
+//         info!("{:?}", event);
+//     }
+// }
