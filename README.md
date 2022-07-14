@@ -18,6 +18,6 @@ Usage:
 - `Space`: move up
 - `ESC`: to grab/release cursor
 
-![Kuka Free Cam](/assets/Robots-sim_14_07_2022.mp4 "Toucheble details")
+![Kuka Free Cam](/assets/Robots-sim_14_07_2022.gif "Toucheble details")
 
 Created with Bevy
