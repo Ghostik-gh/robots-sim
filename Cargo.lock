@@ -306,7 +306,7 @@ checksum = "3da0a284fb26c02cb96ef4d5bbf4de5fad7e1a901730035a61813bf64e28482e"
 dependencies = [
  "bevy-crevice-derive",
  "bytemuck",
- "glam",
+ "glam 0.20.5",
  "mint",
 ]
 
@@ -515,7 +515,42 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "20288df0f70ff258bbaffaf55209f1271a7436438591bbffc3d81e4d84b423f2"
 dependencies = [
  "bevy_reflect",
- "glam",
+ "glam 0.20.5",
+]
+
+[[package]]
+name = "bevy_mod_picking"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ee28e69e9bcd2990273c0d2a976ea0d5b499d154a15c6990864f85fbb6bbee9e"
+dependencies = [
+ "bevy",
+ "bevy_mod_raycast",
+]
+
+[[package]]
+name = "bevy_mod_raycast"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b84a8d57fb1f20aca8c6e3d96e724e54f0ec58ba1d8e8a0989ce3e52d52e2d23"
+dependencies = [
+ "bevy",
+ "float-ord",
+]
+
+[[package]]
+name = "bevy_obj"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ec5999eb52b848744af3c58e9ac810a7fbc2fedce412d651d640ba4c352868d"
+dependencies = [
+ "anyhow",
+ "bevy_app",
+ "bevy_asset",
+ "bevy_render",
+ "bevy_utils",
+ "obj-rs",
+ "thiserror",
 ]
 
 [[package]]
@@ -549,7 +584,7 @@ dependencies = [
  "bevy_utils",
  "downcast-rs",
  "erased-serde",
- "glam",
+ "glam 0.20.5",
  "parking_lot",
  "serde",
  "smallvec",
@@ -1328,6 +1363,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "279fb028e20b3c4c320317955b77c5e0c9701f05a1d309905d6fc702cdc5053e"
 
 [[package]]
+name = "float-ord"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8ce81f49ae8a0482e4c55ea62ebbd7e5a686af544c00b9d090bba3ff9be97b3d"
+
+[[package]]
 name = "fnv"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1450,6 +1491,12 @@ dependencies = [
  "mint",
  "serde",
 ]
+
+[[package]]
+name = "glam"
+version = "0.21.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "781aa11be58ef14b0cd7326618afcbd9cdb5ba686bdab7193d87cdc322cd7033"
 
 [[package]]
 name = "glob"
@@ -1597,11 +1644,11 @@ checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 
 [[package]]
 name = "hexasphere"
-version = "7.1.0"
+version = "7.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2a63b4f20531192178b99682b8911d06108000093cb7e59acf0af342132617d"
+checksum = "9652f2ed7ee9c6374a061039f60fc6e25d7adac7fa10f83365669af3b24b0bf0"
 dependencies = [
- "glam",
+ "glam 0.21.2",
  "once_cell",
 ]
 
@@ -2210,6 +2257,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "obj-rs"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c90a2f645433dba5c609451d3fa847282b0f23ee8d8fa75491a946af53cb1db4"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
 name = "objc"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2500,6 +2556,9 @@ dependencies = [
  "bevy",
  "bevy_flycam",
  "bevy_infinite_grid",
+ "bevy_mod_picking",
+ "bevy_mod_raycast",
+ "bevy_obj",
 ]
 
 [[package]]

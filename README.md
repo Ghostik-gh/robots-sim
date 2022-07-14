@@ -1,18 +1,23 @@
 # Robot Simulator 3d
-Checklist:
+ToDo:
 - ✅ ~~some Application~~
 - ✅ ~~Free camera~~
-- ⏳ Axies
+- ✅ ~~Axies~~
+- ✅ ~~Toucheble Objects~~
+- ✅ ~~Gltf to object~~
+- ⏳ construct robot
 - ⏳ UI
+- ⏳ move object
+- ⏳ refactoring
 ```
 cargo run
 ```
 Usage: 
-- `WASD`: to horizontal movment
-- `LShift`: to move down
-- `Space`: to move up
-- `ESC`: to pause
+- `WASD`: horizontal movment
+- `LShift`: move down
+- `Space`: move up
+- `ESC`: to grab/release cursor
 
-![Kuka Free Cam](/assets/Robots-sim-2022-07-03.gif "Kuka")
+![Kuka Free Cam](/assets/Robots-sim_14_07_2022.mp4 "Toucheble details")
 
 Created with Bevy
