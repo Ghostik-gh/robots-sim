@@ -1,9 +1,9 @@
-use std::{convert::identity, f32::consts::PI};
+use std::{f32::consts::PI};
 
 use bevy::{
     input::{keyboard::KeyboardInput, ElementState},
     prelude::*,
-    scene::InstanceId,
+    scene::{InstanceId},
     window::{PresentMode, WindowMode},
 };
 use bevy_flycam::{FlyCam, MovementSettings, NoCameraPlayerPlugin};
@@ -19,20 +19,19 @@ fn main() {
             present_mode: PresentMode::Fifo,
             ..default()
         })
+        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPickingPlugins)
         .add_plugin(DebugCursorPickingPlugin) // <- Adds the green debug cursor.
         .add_plugin(DebugEventsPickingPlugin) // <- Adds debug event logging.
-        .add_plugins(DefaultPlugins)
         .add_plugin(ObjPlugin)
-        .init_resource::<SceneInstance>()
         .add_plugin(InfiniteGridPlugin)
-        .add_plugins(DefaultPickingPlugins)
+        .add_plugin(NoCameraPlayerPlugin)
+        // Default Movement Settings: sensitivity = 0.00012, speed = 12.0
+        .insert_resource(MovementSettings{sensitivity: 0.00008, speed: 8.0,} )
+        .init_resource::<SceneInstance>()
         .add_startup_system(setup)
         .add_system(selector_obj)
-        .add_plugin(NoCameraPlayerPlugin)
-        .insert_resource(MovementSettings {
-            sensitivity: 0.00008, // default: 0.00012
-            speed: 8.0,           // default: 12.0
-        })
+        .add_system_to_stage(CoreStage::PostUpdate, print_events)
         // .add_system(move_scene_entities)
         .run();
 }
@@ -47,9 +46,9 @@ struct EntityInMyScene;
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    // mut scene_spawner: ResMut<SceneSpawner>,
-    // mut scene_instance: ResMut<SceneInstance>,
-    // mut meshes: ResMut<Assets<Mesh>>,
+    mut scene_spawner: ResMut<SceneSpawner>,
+    mut scene_instance: ResMut<SceneInstance>,
+    mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // let path_to_robo = "models/Black_Honey/scene.gltf#Scene0";
@@ -91,6 +90,11 @@ fn setup(
             ..Default::default()
         })
         .insert_bundle(PickableBundle::default());
+
+    // commands.spawn_scene(scene_spawner_system(base))
+    //  scene_spawner.spawn(base);
+    // let instance_id_0 = scene_spawner.spawn(asset_server.load("models/details_kuka_0/0.gltf#Scene0"));
+    // scene_instance.0 = Some(base);
 
     commands
         .spawn_bundle(PbrBundle {
@@ -143,17 +147,7 @@ fn setup(
         })
         .insert_bundle(PickableBundle::default());
 
-    // commands
-    //     .spawn_bundle(PbrBundle {
-    //         mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-    //         material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-    //         transform: Transform::from_xyz(0.0, 0.5, 0.0),
-    //         ..Default::default()
-    //     })
-    //     .insert_bundle(PickableBundle::default());
 
-    // let instance_id_0 = scene_spawner.spawn(asset_server.load("models/details_kuka_0/0.gltf#Scene0"));
-    // scene_instance.0 = Some(instance_id_0);
 
     commands.spawn_bundle(PointLightBundle {
         point_light: PointLight {
@@ -171,6 +165,40 @@ fn setup(
         transform: Transform::from_xyz(5.0, 8.0, 5.0),
         ..default()
     });
+
+    commands.spawn_bundle(PbrBundle {
+        mesh: meshes.add(Mesh::from(shape::Capsule {
+    // We make the dimensions negative because we want to invert the direction
+    // of light the mesh diffuses (invert the normals).
+            radius: -150.0,
+            depth: -1.0,
+            ..Default::default()
+        })),
+    // We make the mesh as rough as possible to avoid metallic-like reflections
+        material: materials.add(StandardMaterial {
+            perceptual_roughness: 1.0,
+            reflectance: 0.0,
+            emissive: Color::rgb(0.0, 0.05, 0.5),
+            ..Default::default()
+        }),
+        transform: Transform::from_xyz(0.0, 0.0, 0.0)
+            .with_scale(Vec3::new(1.0, 1.0, 1.0)),
+        ..Default::default()
+    });
+}
+
+
+fn print_events(mut events: EventReader<PickingEvent>) {
+    for event in events.iter() {
+        match event {
+            PickingEvent::Selection(e) => info!("A selection event happened: {:?}", e),
+            PickingEvent::Hover(e) => info!("Egads! A hover event!? {:?}", e),
+            PickingEvent::Clicked(e) => {
+                info!("Gee Willikers, it's a click! {:?}", e);
+                // Transform::rotate(e., rotation);
+            },
+        }
+    }
 }
 
 fn selector_obj(
