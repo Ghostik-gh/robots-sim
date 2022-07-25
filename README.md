@@ -1,14 +1,16 @@
 # Robot Simulator 3d
 ToDo:
-- ✅ ~~some Application~~
-- ✅ ~~Free camera~~
-- ✅ ~~Axies~~
-- ✅ ~~Toucheble Objects~~
-- ✅ ~~Gltf to object~~
-- ⏳ construct robot
+- ✅ some Application
+- ✅ Free camera
+- ✅ Axies
+- ✅ Toucheble Objects
+- ✅ Gltf to object
+- ✅ construct robot
+- ✅ move object
+- ⏳ joint points
 - ⏳ UI
-- ⏳ move object
 - ⏳ refactoring
+
 ```
 cargo run
 ```
@@ -18,6 +20,6 @@ Usage:
 - `Space`: move up
 - `ESC`: to grab/release cursor
 
-![Kuka Free Cam](/assets/Robots-sim_14_07_2022.gif "Toucheble details")
+![Robot)](/assets/26_07_2022.gif "Construct Robot")
 
 Created with Bevy
