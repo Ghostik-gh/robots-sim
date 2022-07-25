@@ -25,9 +25,9 @@ fn main() {
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
+                // .with_system(debug_xy_plane) // Debug dunction
                 .with_system(shoulder_rotate)
-                .with_system(lower_arm_rotate)
-                .with_system(move_any_object),
+                .with_system(lower_arm_rotate),
         )
         // .add_plugin(DebugCursorPickingPlugin) // <- Adds the green debug cursor.
         // .add_plugin(DebugEventsPickingPlugin) // <- Adds debug event logging.
@@ -53,9 +53,11 @@ struct LowerArmRotate {
 }
 
 #[derive(Component, Debug)]
+#[allow(unused)]
 struct MoveObject {
     move_speed: f32,
 }
+
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -210,11 +212,13 @@ fn shoulder_rotate(
 fn lower_arm_rotate(
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<(&LowerArmRotate, &mut Transform), Without<ShoulderRotate>>,
-    mut query_2: Query<(&ShoulderRotate, &Transform)>,
+    // mut query_2: Query<(&ShoulderRotate, &Transform)>,
 ) {
     let (object, mut transform) = query.single_mut();
-    let (shoulder, transform_shoulder) = query_2.single_mut();
-    // dbg!(shoulder);
+    // =======================================================================================
+    // Need create some point for sync movement
+    // let (shoulder, transform_shoulder) = query_2.single_mut();
+    // =======================================================================================
     let mut rotation_factor = 0.0;
     if keyboard_input.pressed(KeyCode::Left) {
         if transform.rotation.x < 0.7 {
@@ -234,7 +238,8 @@ fn lower_arm_rotate(
 // add Component MoveObject to debug
 // allows move and rotate object on one plane
 // Usage: "I" "K" "J" "L" "U" "O"
-fn move_any_object(
+#[allow(unused)]
+fn debug_xy_plane(
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<(&MoveObject, &mut Transform)>,
 ) {
