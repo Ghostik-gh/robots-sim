@@ -1,9 +1,9 @@
-use std::{f32::consts::PI};
+use std::f32::consts::PI;
 
 use bevy::{
-    input::{keyboard::KeyboardInput, ElementState},
+    core::FixedTimestep,
+    // input::keyboard::KeyboardInput,
     prelude::*,
-    scene::{InstanceId},
     window::{PresentMode, WindowMode},
 };
 use bevy_flycam::{FlyCam, MovementSettings, NoCameraPlayerPlugin};
@@ -11,6 +11,7 @@ use bevy_mod_picking::*;
 use bevy_obj::*;
 use robots_sim::{InfiniteGridBundle, InfiniteGridPlugin};
 
+const TIME_STEP: f32 = 1.0 / 60.0;
 fn main() {
     App::new()
         .insert_resource(WindowDescriptor {
@@ -20,68 +21,71 @@ fn main() {
             ..default()
         })
         .add_plugins(DefaultPlugins)
+        .add_startup_system(setup)
         .add_plugins(DefaultPickingPlugins)
-        .add_plugin(DebugCursorPickingPlugin) // <- Adds the green debug cursor.
-        .add_plugin(DebugEventsPickingPlugin) // <- Adds debug event logging.
+        .add_system_set(
+            SystemSet::new()
+                .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
+                .with_system(base_rotate)
+                .with_system(shoulder_rotate),
+        )
+        // .add_plugin(DebugCursorPickingPlugin) // <- Adds the green debug cursor.
+        // .add_plugin(DebugEventsPickingPlugin) // <- Adds debug event logging.
         .add_plugin(ObjPlugin)
         .add_plugin(InfiniteGridPlugin)
         .add_plugin(NoCameraPlayerPlugin)
         // Default Movement Settings: sensitivity = 0.00012, speed = 12.0
-        .insert_resource(MovementSettings{sensitivity: 0.00008, speed: 8.0,} )
-        .init_resource::<SceneInstance>()
-        .add_startup_system(setup)
-        .add_system(selector_obj)
-        .add_system_to_stage(CoreStage::PostUpdate, print_events)
-        // .add_system(move_scene_entities)
+        .insert_resource(MovementSettings {
+            sensitivity: 0.00008,
+            speed: 8.0,
+        })
         .run();
 }
 // Resource to hold the scene `instance_id` until it is loaded
-#[derive(Default)]
-struct SceneInstance(Option<InstanceId>);
+// #[derive(Default)]
+// struct SceneInstance(Option<InstanceId>);
+// // Component that will be used to tag entities in the scene
+// #[derive(Component)]
+// struct EntityInMyScene;
 
-// Component that will be used to tag entities in the scene
 #[derive(Component)]
-struct EntityInMyScene;
+struct BaseRotate {
+    rotation_speed: f32,
+}
+
+#[derive(Component, Debug)]
+struct ShoulderRotate {
+    rotation_speed: f32,
+}
 
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut scene_spawner: ResMut<SceneSpawner>,
-    mut scene_instance: ResMut<SceneInstance>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    // let path_to_robo = "models/Black_Honey/scene.gltf#Scene0";
-    // let path_to_robo = "models/details_kuka_0/TEST.gltf#Scene0";
-
     // Grid and Axies
     commands.spawn_bundle(InfiniteGridBundle::default());
-
-    // commands
-    //     .spawn_bundle(Camera3dBundle {
-    //         transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-    //         ..Default::default()
-    //     })
-    //     .insert_bundle(PickingCameraBundle::default());
-
     // Camera
-    let camera = PerspectiveCameraBundle {
-        transform: Transform::from_xyz(4.0, 2.0, 4.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ..Default::default()
-    };
     commands
-        .spawn_bundle(camera)
+        .spawn_bundle(PerspectiveCameraBundle {
+            transform: Transform::from_xyz(4.0, 2.0, 4.0).looking_at(Vec3::ZERO, Vec3::Y),
+            ..Default::default()
+        })
         .insert(FlyCam)
         .insert_bundle(PickingCameraBundle::default());
 
     // Spawn objects
-    // commands
-    //     .spawn_bundle(TransformBundle::from(Transform::from_xyz(0.0, 2.0, 0.0)))
-    //     .with_children(|parent| {
-    //         parent.spawn_scene(asset_server.load("models/details_kuka_0/TEST.gltf#Scene0"));
-    //     })
-    //     .insert_bundle(PickableBundle::default());
-    let radian = PI / 180.;
+    let radian: f32 = PI / 180.;
+    let rotation_speed: f32 = f32::to_radians(1.);
+    commands
+        .spawn_bundle(TransformBundle::from(Transform::from_xyz(0.0, 2.0, 0.0)))
+        .with_children(|parent| {
+            parent.spawn_scene(asset_server.load("models/Gleb_Robot/base.obj"));
+            //"models/details_kuka_0/TEST.gltf#Scene0"
+        })
+        .insert_bundle(PickableBundle::default());
+
     commands
         .spawn_bundle(PbrBundle {
             mesh: asset_server.load("models/Gleb_Robot/base.obj"),
@@ -89,13 +93,10 @@ fn setup(
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..Default::default()
         })
-        .insert_bundle(PickableBundle::default());
-
-    // commands.spawn_scene(scene_spawner_system(base))
-    //  scene_spawner.spawn(base);
-    // let instance_id_0 = scene_spawner.spawn(asset_server.load("models/details_kuka_0/0.gltf#Scene0"));
-    // scene_instance.0 = Some(base);
-
+        .insert_bundle(PickableBundle::default())
+        .insert(BaseRotate {
+            rotation_speed: f32::to_radians(2.), //degrees per second
+        });
     commands
         .spawn_bundle(PbrBundle {
             mesh: asset_server.load("models/Gleb_Robot/shoulder.obj"),
@@ -107,7 +108,8 @@ fn setup(
             )),
             ..Default::default()
         })
-        .insert_bundle(PickableBundle::default());
+        .insert_bundle(PickableBundle::default())
+        .insert(ShoulderRotate { rotation_speed });
 
     commands
         .spawn_bundle(PbrBundle {
@@ -147,8 +149,6 @@ fn setup(
         })
         .insert_bundle(PickableBundle::default());
 
-
-
     commands.spawn_bundle(PointLightBundle {
         point_light: PointLight {
             intensity: 15000.0,
@@ -168,118 +168,55 @@ fn setup(
 
     commands.spawn_bundle(PbrBundle {
         mesh: meshes.add(Mesh::from(shape::Capsule {
-    // We make the dimensions negative because we want to invert the direction
-    // of light the mesh diffuses (invert the normals).
+            // We make the dimensions negative because we want to invert the direction
+            // of light the mesh diffuses (invert the normals).
             radius: -150.0,
             depth: -1.0,
             ..Default::default()
         })),
-    // We make the mesh as rough as possible to avoid metallic-like reflections
+        // We make the mesh as rough as possible to avoid metallic-like reflections
         material: materials.add(StandardMaterial {
             perceptual_roughness: 1.0,
             reflectance: 0.0,
             emissive: Color::rgb(0.0, 0.05, 0.5),
             ..Default::default()
         }),
-        transform: Transform::from_xyz(0.0, 0.0, 0.0)
-            .with_scale(Vec3::new(1.0, 1.0, 1.0)),
+        transform: Transform::from_xyz(0.0, 0.0, 0.0).with_scale(Vec3::new(1.0, 1.0, 1.0)),
         ..Default::default()
     });
 }
 
-
-fn print_events(mut events: EventReader<PickingEvent>) {
-    for event in events.iter() {
-        match event {
-            PickingEvent::Selection(e) => info!("A selection event happened: {:?}", e),
-            PickingEvent::Hover(e) => info!("Egads! A hover event!? {:?}", e),
-            PickingEvent::Clicked(e) => {
-                info!("Gee Willikers, it's a click! {:?}", e);
-                // Transform::rotate(e., rotation);
-            },
-        }
-    }
-}
-
-fn selector_obj(
-    // query_changed: Query<&Interaction, (Changed<Interaction>, Without<NoDeselect>)>,
-    selection_query: Query<
-        (Entity, &Selection, ChangeTrackers<Selection>),
-        (Changed<Selection>, With<PickableMesh>),
-    >,
-    mut picking_events: EventWriter<PickingEvent>,
+fn base_rotate(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<(&BaseRotate, &mut Transform)>,
 ) {
-    // let mut new_selection = false;
-    // for interaction in query_changed.iter() {
-    //     if *interaction == Interaction::Clicked {
-    //         new_selection = true;
-    //     }
-    // }
-    // if new_selection {}
+    let (object, mut transform) = query.single_mut();
+    let mut rotation_factor = 0.0;
 
-    for (entity, selection, selection_change) in selection_query.iter() {
-        if selection_change.is_added() {
-            continue; // Avoid a false change detection when a component is added.
-        }
-        if selection.selected() {
-            println!("SELECTED {:?}", entity);
-        } else {
-            picking_events.send(PickingEvent::Selection(SelectionEvent::JustDeselected(
-                entity,
-            )));
-        }
+    if keyboard_input.pressed(KeyCode::Left) {
+        rotation_factor += object.rotation_speed;
     }
+    if keyboard_input.pressed(KeyCode::Right) {
+        rotation_factor -= object.rotation_speed;
+    }
+
+    transform.rotate(Quat::from_rotation_z(rotation_factor));
 }
 
-// This system will wait for the scene to be ready, and then tag entities from
-// the scene with `EntityInMyScene`. All entities from the second scene will be
-// tagged
-// fn scene_update(
-//     mut commands: Commands,
-//     scene_spawner: Res<SceneSpawner>,
-//     scene_instance: Res<SceneInstance>,
-//     mut done: Local<bool>,
-// ) {
-//     if !*done {
-//         if let Some(instance_id) = scene_instance.0 {
-//             if let Some(entity_iter) = scene_spawner.iter_instance_entities(instance_id) {
-//                 entity_iter.for_each(|entity| {
-//                     commands.entity(entity).insert(EntityInMyScene);
-//                     println!("Entity: {:?}", entity);
-//                 });
-//                 *done = true;
-//             }
-//         }
-//     }
-// }
+fn shoulder_rotate(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<(&ShoulderRotate, &mut Transform)>,
+) {
+    let (object, mut transform) = query.single_mut();
+    let mut rotation_factor = 0.0;
+    if keyboard_input.pressed(KeyCode::Left) {
+        rotation_factor += object.rotation_speed;
+        dbg!(&transform);
+        dbg!(&object);
+    }
+    if keyboard_input.pressed(KeyCode::Right) {
+        rotation_factor -= object.rotation_speed;
+    }
 
-// This system will move all entities with component `EntityInMyScene`, so all
-// entities from the second scene
-// fn move_scene_entities(
-//     // time: Res<Time>,
-//     mut scene_entities: Query<&mut Transform, With<EntityInMyScene>>,
-//     mut keyboard_input_events: EventReader<KeyboardInput>,
-// ) {
-//     let angle = PI / 180.;
-//     let mut current_angle = 0.;
-//     for event in keyboard_input_events.iter() {
-//         if event.scan_code == 16 && event.state == ElementState::Pressed {
-//             current_angle -= angle;
-//             ///////////////////////
-//         } else if event.scan_code == 18 && event.state == ElementState::Pressed {
-//             current_angle += angle;
-//             //////////////////////
-//         }
-//         for mut transform in scene_entities.iter_mut() {
-//             let rotation_speed = Quat::from_rotation_x(current_angle);
-//             transform.rotate(rotation_speed);
-//         }
-//     }
-// }
-
-// This system Read keyboard event and print them
-// fn print_keyboard_event_system(mut keyboard_input_events: EventReader<KeyboardInput>) {
-//     for event in keyboard_input_events.iter() {
-//         info!("{:?}", event);
-//     }
-// }
+    transform.rotate(Quat::from_rotation_z(rotation_factor));
+}
