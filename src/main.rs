@@ -26,8 +26,8 @@ fn main() {
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-                .with_system(base_rotate)
-                .with_system(shoulder_rotate),
+                .with_system(shoulder_rotate)
+                .with_system(lower_arm_rotate),
         )
         // .add_plugin(DebugCursorPickingPlugin) // <- Adds the green debug cursor.
         // .add_plugin(DebugEventsPickingPlugin) // <- Adds debug event logging.
@@ -48,16 +48,15 @@ fn main() {
 // #[derive(Component)]
 // struct EntityInMyScene;
 
-#[derive(Component)]
-struct BaseRotate {
-    rotation_speed: f32,
-}
-
 #[derive(Component, Debug)]
 struct ShoulderRotate {
     rotation_speed: f32,
 }
 
+#[derive(Component, Debug)]
+struct LowerArmRotate {
+    rotation_speed: f32,
+}
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -85,8 +84,7 @@ fn setup(
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..Default::default()
         })
-        .insert_bundle(PickableBundle::default())
-        .insert(BaseRotate { rotation_speed });
+        .insert_bundle(PickableBundle::default());
     commands
         .spawn_bundle(PbrBundle {
             mesh: asset_server.load("models/Gleb_Robot/shoulder.obj"),
@@ -105,10 +103,16 @@ fn setup(
         .spawn_bundle(PbrBundle {
             mesh: asset_server.load("models/Gleb_Robot/lower_arm.obj"),
             material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-            transform: Transform::from_translation(Vec3::new(0., 0.8, 0.25)), //::from_xyz(0.0, 0.8, 0.25),
+            // transform: Transform::from_translation(Vec3::new(0., 0.8, 0.25)),
+            transform: Transform::from_matrix(Mat4::from_scale_rotation_translation(
+                Vec3::new(1., 1., 1.),
+                Quat::from_rotation_y(0.),
+                Vec3::new(0., 0.8, 0.25),
+            )),
             ..Default::default()
         })
-        .insert_bundle(PickableBundle::default());
+        .insert_bundle(PickableBundle::default())
+        .insert(LowerArmRotate { rotation_speed });
 
     commands
         .spawn_bundle(PbrBundle {
@@ -176,23 +180,6 @@ fn setup(
     });
 }
 
-fn base_rotate(
-    keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(&BaseRotate, &mut Transform)>,
-) {
-    let (object, mut transform) = query.single_mut();
-    let mut rotation_factor = 0.0;
-
-    if keyboard_input.pressed(KeyCode::Left) {
-        rotation_factor += object.rotation_speed;
-    }
-    if keyboard_input.pressed(KeyCode::Right) {
-        rotation_factor -= object.rotation_speed;
-    }
-
-    transform.rotate(Quat::from_rotation_z(rotation_factor));
-}
-
 fn shoulder_rotate(
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<(&ShoulderRotate, &mut Transform)>,
@@ -200,17 +187,32 @@ fn shoulder_rotate(
     let (object, mut transform) = query.single_mut();
     let mut rotation_factor = 0.0;
     if keyboard_input.pressed(KeyCode::Left) {
-        if transform.rotation.y < 0.5 {
-            rotation_factor += object.rotation_speed;
-        }
-        dbg!(&transform.rotation.y);
-        dbg!(&object);
+        rotation_factor += object.rotation_speed;
     }
     if keyboard_input.pressed(KeyCode::Right) {
-        if transform.rotation.y > -0.5 {
+        rotation_factor -= object.rotation_speed;
+    }
+
+    transform.rotate(Quat::from_rotation_y(rotation_factor));
+}
+
+fn lower_arm_rotate(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<(&LowerArmRotate, &mut Transform)>,
+) {
+    let (object, mut transform) = query.single_mut();
+    let mut rotation_factor = 0.0;
+    if keyboard_input.pressed(KeyCode::Left) {
+        if transform.rotation.x < 0.7 {
+            rotation_factor += object.rotation_speed;
+        }
+        dbg!(&transform.rotation.x);
+    }
+    if keyboard_input.pressed(KeyCode::Right) {
+        if transform.rotation.x > -0.3 {
             rotation_factor -= object.rotation_speed;
         }
     }
 
-    transform.rotate(Quat::from_rotation_y(rotation_factor));
+    transform.rotate(Quat::from_rotation_x(rotation_factor));
 }
