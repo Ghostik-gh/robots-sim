@@ -79,14 +79,6 @@ fn setup(
     let radian: f32 = PI / 180.;
     let rotation_speed: f32 = f32::to_radians(1.);
     commands
-        .spawn_bundle(TransformBundle::from(Transform::from_xyz(0.0, 2.0, 0.0)))
-        .with_children(|parent| {
-            parent.spawn_scene(asset_server.load("models/Gleb_Robot/base.obj"));
-            //"models/details_kuka_0/TEST.gltf#Scene0"
-        })
-        .insert_bundle(PickableBundle::default());
-
-    commands
         .spawn_bundle(PbrBundle {
             mesh: asset_server.load("models/Gleb_Robot/base.obj"),
             material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
@@ -94,9 +86,7 @@ fn setup(
             ..Default::default()
         })
         .insert_bundle(PickableBundle::default())
-        .insert(BaseRotate {
-            rotation_speed: f32::to_radians(2.), //degrees per second
-        });
+        .insert(BaseRotate { rotation_speed });
     commands
         .spawn_bundle(PbrBundle {
             mesh: asset_server.load("models/Gleb_Robot/shoulder.obj"),
@@ -210,13 +200,17 @@ fn shoulder_rotate(
     let (object, mut transform) = query.single_mut();
     let mut rotation_factor = 0.0;
     if keyboard_input.pressed(KeyCode::Left) {
-        rotation_factor += object.rotation_speed;
-        dbg!(&transform);
+        if transform.rotation.y < 0.5 {
+            rotation_factor += object.rotation_speed;
+        }
+        dbg!(&transform.rotation.y);
         dbg!(&object);
     }
     if keyboard_input.pressed(KeyCode::Right) {
-        rotation_factor -= object.rotation_speed;
+        if transform.rotation.y > -0.5 {
+            rotation_factor -= object.rotation_speed;
+        }
     }
 
-    transform.rotate(Quat::from_rotation_z(rotation_factor));
+    transform.rotate(Quat::from_rotation_y(rotation_factor));
 }
