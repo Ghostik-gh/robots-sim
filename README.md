@@ -1,4 +1,6 @@
 # Robot Simulator 3d
+### Wait for the gif to load at the bottom of the page
+---
 ToDo:
 - ✅ some Application
 - ✅ Free camera
