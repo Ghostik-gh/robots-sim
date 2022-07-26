@@ -1,6 +1,5 @@
 use bevy::{
     core::FixedTimestep,
-    math::Vec3Swizzles,
     prelude::*,
     window::{PresentMode, WindowMode},
 };
@@ -207,6 +206,7 @@ fn setup(
         .insert(MoveObject { move_speed });
 }
 
+// have no idea how it's would work
 fn choise_object(keyboard_input: Res<Input<KeyCode>>) {
     if keyboard_input.pressed(KeyCode::Key1) {
         println!("Key 1");
@@ -238,15 +238,10 @@ fn lower_arm_rotate(
     let (object, mut transform) = query.single_mut();
     // =======================================================================================
     // Need create some point for sync movement
-    let (elbow, mut transform_elbow) = query_2.single_mut();
+    let (_elbow, mut transform_elbow) = query_2.single_mut();
     // =======================================================================================
-    let rad = f32::to_radians(1.);
     let mut rotation_factor = 0.0;
     let radius = 1.6770509831248;
-    let r = f32::sqrt(
-        (transform.translation.y - transform_elbow.translation.y).powf(2.)
-            + (transform.translation.z - transform_elbow.translation.z).powf(2.),
-    );
     // dbg!(r);
     if keyboard_input.pressed(KeyCode::Left) {
         if transform.rotation.x < 0.7 {
@@ -270,6 +265,8 @@ fn lower_arm_rotate(
 }
 
 // fn elbow_rotate(){}
+// fn upper_arm_rotate(){}
+// fn wrist_rotate(){}
 
 // Debug function
 // add Component MoveObject to debug
