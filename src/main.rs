@@ -1,7 +1,6 @@
 use bevy::{
     core::FixedTimestep,
     math::Vec3Swizzles,
-    // input::keyboard::KeyboardInput,
     prelude::*,
     window::{PresentMode, WindowMode},
 };
@@ -25,7 +24,7 @@ fn main() {
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-                // .with_system(debug_xy_plane) // Debug dunction
+                .with_system(debug_zy_plane) // Debug dunction
                 .with_system(shoulder_rotate)
                 .with_system(lower_arm_rotate),
         )
@@ -49,6 +48,11 @@ struct ShoulderRotate {
 
 #[derive(Component, Debug)]
 struct LowerArmRotate {
+    rotation_speed: f32,
+}
+
+#[derive(Component, Debug)]
+struct ElbowRotate {
     rotation_speed: f32,
 }
 
@@ -105,7 +109,6 @@ fn setup(
         .spawn_bundle(PbrBundle {
             mesh: asset_server.load("models/Gleb_Robot/lower_arm.obj"),
             material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-            // transform: Transform::from_translation(Vec3::new(0., 0.8, 0.25)),
             transform: Transform::from_matrix(Mat4::from_scale_rotation_translation(
                 Vec3::new(1., 1., 1.),
                 Quat::from_rotation_y(0.),
@@ -127,12 +130,12 @@ fn setup(
             )),
             ..Default::default()
         })
-        .insert_bundle(PickableBundle::default());
+        .insert_bundle(PickableBundle::default())
+        .insert(ElbowRotate { rotation_speed });
     commands
         .spawn_bundle(PbrBundle {
             mesh: asset_server.load("models/Gleb_Robot/upper_arm.obj"),
             material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-            // transform: Transform::from_xyz(0.0, 0.9, 1.85),
             transform: Transform::from_matrix(Mat4::from_scale_rotation_translation(
                 Vec3::new(1., 1., 1.),
                 Quat::from_rotation_x(0.),
@@ -145,7 +148,6 @@ fn setup(
         .spawn_bundle(PbrBundle {
             mesh: asset_server.load("models/Gleb_Robot/wrist.obj"),
             material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-            // transform: Transform::from_xyz(0.0, 1., 0.32),
             transform: Transform::from_matrix(Mat4::from_scale_rotation_translation(
                 Vec3::new(1., 1., 1.),
                 Quat::from_rotation_x(0.25844246),
@@ -153,8 +155,7 @@ fn setup(
             )),
             ..Default::default()
         })
-        .insert_bundle(PickableBundle::default())
-        .insert(MoveObject { move_speed });
+        .insert_bundle(PickableBundle::default());
 
     commands.spawn_bundle(PointLightBundle {
         point_light: PointLight {
@@ -191,6 +192,25 @@ fn setup(
         transform: Transform::from_xyz(0.0, 0.0, 0.0).with_scale(Vec3::new(1.0, 1.0, 1.0)),
         ..Default::default()
     });
+    // Debug Cube
+    commands
+        .spawn_bundle(PbrBundle {
+            mesh: meshes.add(Mesh::from(shape::Cube::new(0.1))),
+            material: materials.add(StandardMaterial {
+                perceptual_roughness: 1.0,
+                emissive: Color::rgb(0.0, 0.05, 0.5),
+                ..Default::default()
+            }),
+            transform: Transform::from_xyz(0.0, 0.0, 0.0).with_scale(Vec3::new(1.0, 1.0, 1.0)),
+            ..Default::default()
+        })
+        .insert(MoveObject { move_speed });
+}
+
+fn choise_object(keyboard_input: Res<Input<KeyCode>>) {
+    if keyboard_input.pressed(KeyCode::Key1) {
+        println!("Key 1");
+    }
 }
 
 fn shoulder_rotate(
@@ -207,39 +227,56 @@ fn shoulder_rotate(
     }
 
     transform.rotate(Quat::from_rotation_y(rotation_factor));
+    dbg!(transform);
 }
 
 fn lower_arm_rotate(
     keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(&LowerArmRotate, &mut Transform), Without<ShoulderRotate>>,
-    // mut query_2: Query<(&ShoulderRotate, &Transform)>,
+    mut query: Query<(&LowerArmRotate, &mut Transform), Without<ElbowRotate>>,
+    mut query_2: Query<(&ElbowRotate, &mut Transform), Without<LowerArmRotate>>,
 ) {
     let (object, mut transform) = query.single_mut();
     // =======================================================================================
     // Need create some point for sync movement
-    // let (shoulder, transform_shoulder) = query_2.single_mut();
+    let (elbow, mut transform_elbow) = query_2.single_mut();
     // =======================================================================================
+    let rad = f32::to_radians(1.);
     let mut rotation_factor = 0.0;
+    let radius = 1.6770509831248;
+    let r = f32::sqrt(
+        (transform.translation.y - transform_elbow.translation.y).powf(2.)
+            + (transform.translation.z - transform_elbow.translation.z).powf(2.),
+    );
+    // dbg!(r);
     if keyboard_input.pressed(KeyCode::Left) {
         if transform.rotation.x < 0.7 {
             rotation_factor += object.rotation_speed;
+            transform.rotate(Quat::from_rotation_x(rotation_factor));
+            transform_elbow.translation.z = radius * f32::sin(transform.rotation.x);
+            transform_elbow.translation.y = radius * f32::cos(transform.rotation.x);
         }
+        //    0.0,    1.55,         -1.25
+        //    0.0,    0.5699963,    -1.3780084,
     }
     if keyboard_input.pressed(KeyCode::Right) {
         if transform.rotation.x > -0.3 {
             rotation_factor -= object.rotation_speed;
+            transform.rotate(Quat::from_rotation_x(rotation_factor));
+            transform_elbow.translation.z = radius * f32::sin(transform.rotation.x);
+            transform_elbow.translation.y = radius * f32::cos(transform.rotation.x);
         }
     }
-
-    transform.rotate(Quat::from_rotation_x(rotation_factor));
+    // transform.rotate(Quat::from_rotation_x(rotation_factor));
 }
+
+// fn elbow_rotate(){}
 
 // Debug function
 // add Component MoveObject to debug
 // allows move and rotate object on one plane
 // Usage: "I" "K" "J" "L" "U" "O"
 #[allow(unused)]
-fn debug_xy_plane(
+fn debug_zy_plane(
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<(&MoveObject, &mut Transform)>,
 ) {
@@ -264,6 +301,6 @@ fn debug_xy_plane(
     if keyboard_input.pressed(KeyCode::O) {
         transform.rotate(Quat::from_rotation_x(-rotation_speed));
     }
-    dbg!(transform.translation.xyz());
-    dbg!(transform.rotation.x);
+    // dbg!(transform.translation.xyz());
+    // dbg!(transform.rotation.x);
 }
