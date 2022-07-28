@@ -9,6 +9,7 @@ ToDo:
 - ✅ Gltf to object
 - ✅ construct robot
 - ✅ move object
+- ✅ Chose rotate object on key
 - ⏳ joint points
 - ⏳ UI
 - ⏳ refactoring
@@ -17,6 +18,11 @@ ToDo:
 cargo run
 ```
 Usage: 
+- `1`: Shoulder
+- `2`: LowerArm
+- `3`: Elbow
+- `4`: UpperArm
+- `5`: Wrist
 - `WASD`: horizontal movment
 - `LShift`: move down
 - `Space`: move up
