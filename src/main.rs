@@ -24,8 +24,12 @@ fn main() {
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
                 .with_system(debug_zy_plane) // Debug dunction
+                .with_system(choise_object)
                 .with_system(shoulder_rotate)
-                .with_system(lower_arm_rotate),
+                .with_system(lower_arm_rotate)
+                .with_system(elbow_rotate)
+                .with_system(upper_arm_rotate)
+                .with_system(wrist_rotate),
         )
         // .add_plugin(DebugCursorPickingPlugin) // <- Adds the green debug cursor.
         // .add_plugin(DebugEventsPickingPlugin) // <- Adds debug event logging.
@@ -43,16 +47,30 @@ fn main() {
 #[derive(Component, Debug)]
 struct ShoulderRotate {
     rotation_speed: f32,
+    can_move: bool,
 }
 
 #[derive(Component, Debug)]
 struct LowerArmRotate {
     rotation_speed: f32,
+    can_move: bool,
 }
 
 #[derive(Component, Debug)]
 struct ElbowRotate {
     rotation_speed: f32,
+    can_move: bool,
+}
+#[derive(Component, Debug)]
+struct UpperArmRotate {
+    rotation_speed: f32,
+    can_move: bool,
+}
+
+#[derive(Component, Debug)]
+struct WristRotate {
+    rotation_speed: f32,
+    can_move: bool,
 }
 
 #[derive(Component, Debug)]
@@ -80,7 +98,6 @@ fn setup(
 
     // Spawn objects
     let rotation_speed: f32 = f32::to_radians(1.);
-    let move_speed: f32 = 0.001;
 
     commands
         .spawn_bundle(PbrBundle {
@@ -102,7 +119,10 @@ fn setup(
             ..Default::default()
         })
         .insert_bundle(PickableBundle::default())
-        .insert(ShoulderRotate { rotation_speed });
+        .insert(ShoulderRotate {
+            rotation_speed,
+            can_move: false,
+        });
 
     commands
         .spawn_bundle(PbrBundle {
@@ -116,7 +136,10 @@ fn setup(
             ..Default::default()
         })
         .insert_bundle(PickableBundle::default())
-        .insert(LowerArmRotate { rotation_speed });
+        .insert(LowerArmRotate {
+            rotation_speed,
+            can_move: false,
+        });
 
     commands
         .spawn_bundle(PbrBundle {
@@ -130,7 +153,10 @@ fn setup(
             ..Default::default()
         })
         .insert_bundle(PickableBundle::default())
-        .insert(ElbowRotate { rotation_speed });
+        .insert(ElbowRotate {
+            rotation_speed,
+            can_move: false,
+        });
     commands
         .spawn_bundle(PbrBundle {
             mesh: asset_server.load("models/Gleb_Robot/upper_arm.obj"),
@@ -142,7 +168,11 @@ fn setup(
             )),
             ..Default::default()
         })
-        .insert_bundle(PickableBundle::default());
+        .insert_bundle(PickableBundle::default())
+        .insert(UpperArmRotate {
+            rotation_speed,
+            can_move: false,
+        });
     commands
         .spawn_bundle(PbrBundle {
             mesh: asset_server.load("models/Gleb_Robot/wrist.obj"),
@@ -154,7 +184,11 @@ fn setup(
             )),
             ..Default::default()
         })
-        .insert_bundle(PickableBundle::default());
+        .insert_bundle(PickableBundle::default())
+        .insert(WristRotate {
+            rotation_speed,
+            can_move: false,
+        });
 
     commands.spawn_bundle(PointLightBundle {
         point_light: PointLight {
@@ -192,24 +226,64 @@ fn setup(
         ..Default::default()
     });
     // Debug Cube
-    commands
-        .spawn_bundle(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Cube::new(0.1))),
-            material: materials.add(StandardMaterial {
-                perceptual_roughness: 1.0,
-                emissive: Color::rgb(0.0, 0.05, 0.5),
-                ..Default::default()
-            }),
-            transform: Transform::from_xyz(0.0, 0.0, 0.0).with_scale(Vec3::new(1.0, 1.0, 1.0)),
-            ..Default::default()
-        })
-        .insert(MoveObject { move_speed });
+    // commands
+    //     .spawn_bundle(PbrBundle {
+    //         mesh: meshes.add(Mesh::from(shape::Cube::new(0.1))),
+    //         material: materials.add(StandardMaterial {
+    //             perceptual_roughness: 1.0,
+    //             emissive: Color::rgb(0.0, 0.05, 0.5),
+    //             ..Default::default()
+    //         }),
+    //         transform: Transform::from_xyz(0.0, 0.0, 0.0).with_scale(Vec3::new(1.0, 1.0, 1.0)),
+    //         ..Default::default()
+    //     })
+    //     .insert(MoveObject { move_speed: 0.001 });
 }
 
 // have no idea how it's would work
-fn choise_object(keyboard_input: Res<Input<KeyCode>>) {
+fn choise_object(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query1: Query<&mut ShoulderRotate>,
+    mut query2: Query<&mut LowerArmRotate>,
+    mut query3: Query<&mut ElbowRotate>,
+    mut query4: Query<&mut UpperArmRotate>,
+    mut query5: Query<&mut WristRotate>,
+) {
+    let mut object1 = query1.single_mut();
+    let mut object2 = query2.single_mut();
+    let mut object3 = query3.single_mut();
+    let mut object4 = query4.single_mut();
+    let mut object5 = query5.single_mut();
     if keyboard_input.pressed(KeyCode::Key1) {
-        println!("Key 1");
+        object1.can_move = true;
+        object2.can_move = false;
+        object3.can_move = false;
+        object4.can_move = false;
+        object5.can_move = false;
+    } else if keyboard_input.pressed(KeyCode::Key2) {
+        object1.can_move = false;
+        object2.can_move = true;
+        object3.can_move = false;
+        object4.can_move = false;
+        object5.can_move = false;
+    } else if keyboard_input.pressed(KeyCode::Key3) {
+        object1.can_move = false;
+        object2.can_move = false;
+        object3.can_move = true;
+        object4.can_move = false;
+        object5.can_move = false;
+    } else if keyboard_input.pressed(KeyCode::Key4) {
+        object1.can_move = false;
+        object2.can_move = false;
+        object3.can_move = false;
+        object4.can_move = true;
+        object5.can_move = false;
+    } else if keyboard_input.pressed(KeyCode::Key5) {
+        object1.can_move = false;
+        object2.can_move = false;
+        object3.can_move = false;
+        object4.can_move = false;
+        object5.can_move = true;
     }
 }
 
@@ -219,15 +293,15 @@ fn shoulder_rotate(
 ) {
     let (object, mut transform) = query.single_mut();
     let mut rotation_factor = 0.0;
-    if keyboard_input.pressed(KeyCode::Left) {
-        rotation_factor += object.rotation_speed;
+    if object.can_move {
+        if keyboard_input.pressed(KeyCode::Left) {
+            rotation_factor += object.rotation_speed;
+        }
+        if keyboard_input.pressed(KeyCode::Right) {
+            rotation_factor -= object.rotation_speed;
+        }
+        transform.rotate(Quat::from_rotation_y(rotation_factor));
     }
-    if keyboard_input.pressed(KeyCode::Right) {
-        rotation_factor -= object.rotation_speed;
-    }
-
-    transform.rotate(Quat::from_rotation_y(rotation_factor));
-    dbg!(transform);
 }
 
 fn lower_arm_rotate(
@@ -238,35 +312,103 @@ fn lower_arm_rotate(
     let (object, mut transform) = query.single_mut();
     // =======================================================================================
     // Need create some point for sync movement
-    let (_elbow, mut transform_elbow) = query_2.single_mut();
+    let (_elbow, mut _transform_elbow) = query_2.single_mut();
     // =======================================================================================
     let mut rotation_factor = 0.0;
-    let radius = 1.6770509831248;
-    // dbg!(r);
-    if keyboard_input.pressed(KeyCode::Left) {
-        if transform.rotation.x < 0.7 {
-            rotation_factor += object.rotation_speed;
-            transform.rotate(Quat::from_rotation_x(rotation_factor));
-            transform_elbow.translation.z = radius * f32::sin(transform.rotation.x);
-            transform_elbow.translation.y = radius * f32::cos(transform.rotation.x);
+    let _radius = 1.6770509831248;
+    if object.can_move {
+        if keyboard_input.pressed(KeyCode::Left) {
+            if transform.rotation.x < 0.7 {
+                rotation_factor += object.rotation_speed;
+                transform.rotate(Quat::from_rotation_x(rotation_factor));
+                // transform_elbow.translation.z =
+                //     radius * f32::sin(transform.rotation.x) + transform.translation.z;
+                // transform_elbow.translation.y =
+                //     radius * f32::cos(transform.rotation.x) + transform.translation.y;
+            }
+            //    0.0,    1.55,         -1.25
+            //    0.0,    0.5699963,    -1.3780084,
         }
-        //    0.0,    1.55,         -1.25
-        //    0.0,    0.5699963,    -1.3780084,
-    }
-    if keyboard_input.pressed(KeyCode::Right) {
-        if transform.rotation.x > -0.3 {
-            rotation_factor -= object.rotation_speed;
-            transform.rotate(Quat::from_rotation_x(rotation_factor));
-            transform_elbow.translation.z = radius * f32::sin(transform.rotation.x);
-            transform_elbow.translation.y = radius * f32::cos(transform.rotation.x);
+        if keyboard_input.pressed(KeyCode::Right) {
+            if transform.rotation.x > -0.3 {
+                rotation_factor -= object.rotation_speed;
+                transform.rotate(Quat::from_rotation_x(rotation_factor));
+                // transform_elbow.translation.z =
+                //     radius * f32::sin(transform.rotation.x) + transform.translation.z;
+                // transform_elbow.translation.y =
+                //     radius * f32::cos(transform.rotation.x) + transform.translation.y;
+            }
         }
     }
     // transform.rotate(Quat::from_rotation_x(rotation_factor));
 }
 
-// fn elbow_rotate(){}
-// fn upper_arm_rotate(){}
-// fn wrist_rotate(){}
+fn elbow_rotate(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<(&ElbowRotate, &mut Transform)>,
+) {
+    let (object, mut transform) = query.single_mut();
+    let mut rotation_factor = 0.0;
+    if object.can_move {
+        if keyboard_input.pressed(KeyCode::Left) {
+            rotation_factor += object.rotation_speed;
+        }
+        if keyboard_input.pressed(KeyCode::Right) {
+            rotation_factor -= object.rotation_speed;
+        }
+        transform.rotate(Quat::from_rotation_x(rotation_factor));
+    }
+}
+fn upper_arm_rotate(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<(&UpperArmRotate, &mut Transform)>,
+) {
+    let (object, mut transform) = query.single_mut();
+    let mut rotation_factor = 0.0;
+    if object.can_move {
+        if keyboard_input.pressed(KeyCode::Left) {
+            rotation_factor += object.rotation_speed;
+            transform.rotate(Quat::from_rotation_y(rotation_factor));
+        }
+        if keyboard_input.pressed(KeyCode::Right) {
+            rotation_factor -= object.rotation_speed;
+            transform.rotate(Quat::from_rotation_y(rotation_factor));
+        }
+        if keyboard_input.pressed(KeyCode::Up) {
+            rotation_factor -= object.rotation_speed;
+            transform.rotate(Quat::from_rotation_x(rotation_factor));
+        }
+        if keyboard_input.pressed(KeyCode::Down) {
+            rotation_factor += object.rotation_speed;
+            transform.rotate(Quat::from_rotation_x(rotation_factor));
+        }
+    }
+}
+fn wrist_rotate(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut query: Query<(&WristRotate, &mut Transform)>,
+) {
+    let (object, mut transform) = query.single_mut();
+    let mut rotation_factor = 0.0;
+    if object.can_move {
+        if keyboard_input.pressed(KeyCode::Left) {
+            rotation_factor += object.rotation_speed;
+            transform.rotate(Quat::from_rotation_y(rotation_factor));
+        }
+        if keyboard_input.pressed(KeyCode::Right) {
+            rotation_factor -= object.rotation_speed;
+            transform.rotate(Quat::from_rotation_y(rotation_factor));
+        }
+        if keyboard_input.pressed(KeyCode::Up) {
+            rotation_factor -= object.rotation_speed;
+            transform.rotate(Quat::from_rotation_x(rotation_factor));
+        }
+        if keyboard_input.pressed(KeyCode::Down) {
+            rotation_factor += object.rotation_speed;
+            transform.rotate(Quat::from_rotation_x(rotation_factor));
+        }
+    }
+}
 
 // Debug function
 // add Component MoveObject to debug
