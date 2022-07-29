@@ -428,8 +428,8 @@ dependencies = [
 
 [[package]]
 name = "bevy_infinite_grid"
-version = "0.2.1"
-source = "git+https://github.com/ForesightMiningSoftwareCorporation/bevy_infinite_grid?branch=main#0b48f98071f2eac4246a82090462ab8655c8d5da"
+version = "0.4.0"
+source = "git+https://github.com/ForesightMiningSoftwareCorporation/bevy_infinite_grid?branch=main#4326e3d17c6109e3ef20067dd69556493f7f582d"
 dependencies = [
  "bevy",
 ]

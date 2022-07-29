@@ -1,3 +1,9 @@
+pub mod elbow;
+pub mod lower_arm;
+pub mod shoulder;
+pub mod upper_arm;
+pub mod wrist;
+
 use std::borrow::Cow;
 
 use bevy::{
