@@ -1,6 +1,5 @@
 use bevy::{
     core::FixedTimestep,
-    diagnostic::Diagnostics,
     prelude::*,
     window::{PresentMode, WindowMode},
 };
@@ -56,9 +55,6 @@ fn main() {
 struct MoveObject {
     move_speed: f32,
 }
-
-// #[derive(Component)]
-// struct UI;
 
 fn setup(
     mut commands: Commands,
@@ -206,38 +202,6 @@ fn setup(
         transform: Transform::from_xyz(0.0, 0.0, 0.0).with_scale(Vec3::new(1.0, 1.0, 1.0)),
         ..Default::default()
     });
-    // commands
-    //     .spawn_bundle(TextBundle {
-    //         style: Style {
-    //             align_self: AlignSelf::FlexEnd,
-    //             ..default()
-    //         },
-    //         // Use `Text` directly
-    //         text: Text {
-    //             // Construct a `Vec` of `TextSection`s
-    //             sections: vec![
-    //                 TextSection {
-    //                     value: "Shoulder: ".to_string(),
-    //                     style: TextStyle {
-    //                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-    //                         font_size: 60.0,
-    //                         color: Color::WHITE,
-    //                     },
-    //                 },
-    //                 TextSection {
-    //                     value: "".to_string(),
-    //                     style: TextStyle {
-    //                         font: asset_server.load("fonts/FiraMono-Medium.ttf"),
-    //                         font_size: 60.0,
-    //                         color: Color::GOLD,
-    //                     },
-    //                 },
-    //             ],
-    //             ..default()
-    //         },
-    //         ..default()
-    //     })
-    //     .insert(UI);
 
     // Debug Cube
     // commands
@@ -284,14 +248,6 @@ fn choise_object(
         object5.can_move = true;
     }
 }
-// fn text_update_system(mut query: Query<&mut Text, With<UI>>) {
-//     for mut text in query.iter_mut() {
-//         if let Some(average) = fps.average() {
-//             // Update the value of the second section
-//             text.sections[1].value = format!("{:.2}", average);
-//         }
-//     }
-// }
 
 // Debug function
 // add Component MoveObject to debug
