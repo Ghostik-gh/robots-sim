@@ -1,5 +1,6 @@
 use bevy::{
     core::FixedTimestep,
+    math::Vec3Swizzles,
     prelude::*,
     window::{PresentMode, WindowMode},
 };
@@ -23,7 +24,7 @@ fn main() {
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-                .with_system(debug_zy_plane) // Debug dunction
+                // .with_system(debug_zy_plane) // Debug dunction
                 .with_system(choise_object)
                 .with_system(shoulder_rotate)
                 .with_system(lower_arm_rotate)
