@@ -157,11 +157,11 @@ pub fn change_text_system(
     let (_upper_arm, upper_arm_transform) = query_upper_arm.single();
     let (_wrist, wrist_transform) = query_wrist.single();
     for mut text in query.iter_mut() {
-        text.sections[1].value = shoulder_transform.rotation.y.to_string();
-        text.sections[3].value = lower_arm_transform.rotation.x.to_string();
-        text.sections[5].value = elbow_transform.rotation.x.to_string();
-        text.sections[7].value = upper_arm_transform.rotation.x.to_string();
-        text.sections[9].value = wrist_transform.rotation.z.to_string();
+        text.sections[1].value = shoulder_transform.rotation.y.to_degrees().to_string();
+        text.sections[3].value = lower_arm_transform.rotation.x.to_degrees().to_string();
+        text.sections[5].value = elbow_transform.rotation.x.to_degrees().to_string();
+        text.sections[7].value = upper_arm_transform.rotation.x.to_degrees().to_string();
+        text.sections[9].value = wrist_transform.rotation.z.to_degrees().to_string();
     }
     // dbg!(shoulder_transform);
 }
