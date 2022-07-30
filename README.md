@@ -15,7 +15,7 @@ ToDo:
 - ⏳ joint points
 
 ```
-cargo run
+cargo run --release
 ```
 
 ![Robot](/assets/2022_07_30.gif "Construct Robot")
