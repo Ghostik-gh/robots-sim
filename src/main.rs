@@ -4,7 +4,6 @@ use bevy::{
     window::{PresentMode, WindowMode},
 };
 use bevy_flycam::{FlyCam, MovementSettings, NoCameraPlayerPlugin};
-use bevy_mod_picking::*;
 use bevy_obj::*;
 use robots_sim::{InfiniteGridBundle, InfiniteGridPlugin};
 
@@ -22,7 +21,6 @@ fn main() {
         .insert_resource(WindowDescriptor {
             title: "Robots-sim".to_string(),
             mode: WindowMode::Windowed,
-            // present_mode: PresentMode::Fifo,
             present_mode: PresentMode::Immediate,
             ..default()
         })
@@ -32,7 +30,6 @@ fn main() {
         .add_system(change_text_system)
         .add_startup_system(setup_robot)
         .add_startup_system(setup)
-        .add_plugins(DefaultPickingPlugins)
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
@@ -67,8 +64,7 @@ fn setup(
             transform: Transform::from_xyz(4.0, 2.0, 4.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..Default::default()
         })
-        .insert(FlyCam)
-        .insert_bundle(PickingCameraBundle::default());
+        .insert(FlyCam);
     // Light
     commands.spawn_bundle(PointLightBundle {
         point_light: PointLight {
