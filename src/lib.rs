@@ -1,4 +1,5 @@
 pub mod elbow;
+pub mod infotext_system;
 pub mod lower_arm;
 pub mod shoulder;
 pub mod upper_arm;

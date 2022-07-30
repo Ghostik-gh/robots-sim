@@ -9,6 +9,7 @@ use bevy_obj::*;
 use robots_sim::{InfiniteGridBundle, InfiniteGridPlugin};
 
 use robots_sim::elbow::*;
+use robots_sim::infotext_system::*;
 use robots_sim::lower_arm::*;
 use robots_sim::shoulder::*;
 use robots_sim::upper_arm::*;
@@ -20,10 +21,14 @@ fn main() {
         .insert_resource(WindowDescriptor {
             title: "Robots-sim".to_string(),
             mode: WindowMode::Windowed,
-            present_mode: PresentMode::Fifo,
+            // present_mode: PresentMode::Fifo,
+            present_mode: PresentMode::Immediate,
             ..default()
         })
         .add_plugins(DefaultPlugins)
+        .add_startup_system(infotext_system)
+        .add_system(fps_system)
+        .add_system(change_text_system)
         .add_startup_system(setup)
         .add_plugins(DefaultPickingPlugins)
         .add_system_set(
@@ -55,7 +60,6 @@ fn main() {
 struct MoveObject {
     move_speed: f32,
 }
-
 fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -231,20 +235,35 @@ fn choise_object(
     let mut object3 = query3.single_mut();
     let mut object4 = query4.single_mut();
     let mut object5 = query5.single_mut();
-    object1.can_move = false;
-    object2.can_move = false;
-    object3.can_move = false;
-    object4.can_move = false;
-    object5.can_move = false;
     if keyboard_input.pressed(KeyCode::Key1) {
         object1.can_move = true;
+        object2.can_move = false;
+        object3.can_move = false;
+        object4.can_move = false;
+        object5.can_move = false;
     } else if keyboard_input.pressed(KeyCode::Key2) {
+        object1.can_move = false;
         object2.can_move = true;
+        object3.can_move = false;
+        object4.can_move = false;
+        object5.can_move = false;
     } else if keyboard_input.pressed(KeyCode::Key3) {
+        object1.can_move = false;
+        object2.can_move = false;
         object3.can_move = true;
+        object4.can_move = false;
+        object5.can_move = false;
     } else if keyboard_input.pressed(KeyCode::Key4) {
+        object1.can_move = false;
+        object2.can_move = false;
+        object3.can_move = false;
         object4.can_move = true;
+        object5.can_move = false;
     } else if keyboard_input.pressed(KeyCode::Key5) {
+        object1.can_move = false;
+        object2.can_move = false;
+        object3.can_move = false;
+        object4.can_move = false;
         object5.can_move = true;
     }
 }
