@@ -139,7 +139,7 @@ pub fn fps_system(
                 frame_time = frame_time_avg;
             }
         }
-        text.sections[1].value = format!("{:.3}", frame_time * 1000.0);
+        text.sections[1].value = format!("{:.3}", frame_time * 10000.0);
     }
 }
 
