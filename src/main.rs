@@ -3,17 +3,18 @@ use bevy::{
     prelude::*,
     window::{PresentMode, WindowMode},
 };
+use bevy_egui::EguiPlugin;
 use bevy_flycam::{FlyCam, MovementSettings, NoCameraPlayerPlugin};
 use bevy_obj::*;
-use robots_sim::{InfiniteGridBundle, InfiniteGridPlugin};
 
 use robots_sim::elbow::*;
-use robots_sim::infotext_system::*;
 use robots_sim::lower_arm::*;
 use robots_sim::robot::*;
 use robots_sim::shoulder::*;
+use robots_sim::side_panel::*;
 use robots_sim::upper_arm::*;
 use robots_sim::wrist::*;
+use robots_sim::{InfiniteGridBundle, InfiniteGridPlugin};
 
 const TIME_STEP: f32 = 1.0 / 60.0;
 fn main() {
@@ -25,9 +26,9 @@ fn main() {
             ..default()
         })
         .add_plugins(DefaultPlugins)
-        .add_startup_system(infotext_system)
-        .add_system(fps_system)
-        .add_system(change_text_system)
+        .add_plugin(EguiPlugin)
+        .init_resource::<UiState>()
+        .add_system(ui_example)
         .add_startup_system(setup_robot)
         .add_startup_system(setup)
         .add_system_set(
