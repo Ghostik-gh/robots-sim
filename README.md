@@ -1,42 +1,31 @@
 # Robot Simulator 3d
-### Wait for the gif to load at the bottom of the page
----
-ToDo:
+
+```
+git clone https://github.com/Ghostik-gh/robots-sim.git
+
+cargo run --release
+```
+Use ESC to release cursor and take sliders
+
+![Robot](/assets/2022_07_31.gif "Release version")
+
+Usage: 
+- `WASD`: horizontal movment
+- `LShift`: move down
+- `Space`: move up
+- `ESC`: to grab/release cursor
+
+History of project:
 - ✅ some Application
 - ✅ Free camera
 - ✅ Axies
-- ✅ Toucheble Objects
+- ✅ Toucheble Objects #Unsed on release version
 - ✅ Gltf to object
 - ✅ construct robot
 - ✅ move object
-- ✅ Chose rotate object on key
+- ✅ Chose rotate object on key #Unsed on release version
 - ✅ UI
 - ✅ refactoring
-- ⏳ joint points
-
-```
-cargo run --release
-```
-
-![Robot](/assets/2022_07_30.gif "Construct Robot")
-
-Usage: 
-
-    Select item:
-    - `1`: Shoulder
-    - `2`: LowerArm
-    - `3`: Elbow
-    - `4`: UpperArm
-    - `5`: Wrist
-
-    Move Item:
-    `Left && Right`: to rotate
-
-    Move Camera
-    - `WASD`: horizontal movment
-    - `LShift`: move down
-    - `Space`: move up
-    - `ESC`: to grab/release cursor
-
+- ✅ parenting
 
 Created with Bevy

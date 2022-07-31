@@ -12,14 +12,6 @@ pub fn wrist_rotate(
     let (object, mut transform) = query.single_mut();
     let mut rotation_factor = 0.0;
     if object.can_move {
-        // if keyboard_input.pressed(KeyCode::Left) {
-        //     rotation_factor += object.rotation_speed;
-        //     transform.rotate(Quat::from_rotation_y(rotation_factor));
-        // }
-        // if keyboard_input.pressed(KeyCode::Right) {
-        //     rotation_factor -= object.rotation_speed;
-        //     transform.rotate(Quat::from_rotation_y(rotation_factor));
-        // }
         if transform.rotation.x < 1. {
             if keyboard_input.pressed(KeyCode::Left) {
                 rotation_factor -= object.rotation_speed;
