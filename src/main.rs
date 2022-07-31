@@ -34,12 +34,7 @@ fn main() {
         .add_system_set(
             SystemSet::new()
                 .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-                .with_system(choise_object)
-                .with_system(shoulder_rotate)
-                .with_system(lower_arm_rotate)
-                .with_system(elbow_rotate)
-                .with_system(upper_arm_rotate)
-                .with_system(wrist_rotate),
+                .with_system(choise_object),
         )
         .add_plugin(ObjPlugin)
         .add_plugin(InfiniteGridPlugin)
