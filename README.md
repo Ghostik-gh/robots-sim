@@ -7,7 +7,7 @@ cargo run --release
 ```
 Use ESC to release cursor and take sliders
 
-![Robot](/assets/2022_07_31.gif "Release version")
+![Robot](/assets/2022_07_31.webp "Release version")
 
 Usage: 
 - `WASD`: horizontal movment
