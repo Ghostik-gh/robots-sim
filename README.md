@@ -1,5 +1,6 @@
 # Robot Simulator 3d
 
+Work only with one given robot
 ```
 git clone https://github.com/Ghostik-gh/robots-sim.git
 
